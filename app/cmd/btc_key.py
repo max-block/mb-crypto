@@ -6,13 +6,20 @@ from bip_utils import Bip39MnemonicGenerator, Bip39SeedGenerator, Bip39WordsNum,
 @click.option("-m", "--mnemonic")
 @click.option("-p", "--passphrase", default="")
 @click.option("-l", "--limit", default=5)
-@click.option("--print-private/--no-print-private", default=True)
-def cli(mnemonic: str, passphrase: str, limit: int, print_private: bool):
+@click.option("--ask-passphrase", is_flag=True)
+@click.option("--hide-mnemonic", is_flag=True)
+@click.option("--hide-private", is_flag=True)
+def cli(mnemonic: str, passphrase: str, limit: int, ask_passphrase: bool, hide_mnemonic: bool, hide_private: bool):
+    if ask_passphrase:
+        passphrase = click.prompt("passphrase", hide_input=True)
+
     if not mnemonic:
         mnemonic = Bip39MnemonicGenerator.FromWordsNumber(Bip39WordsNum.WORDS_NUM_24)
+
     seed_bytes = Bip39SeedGenerator(mnemonic).Generate(passphrase)
 
-    click.echo(mnemonic + "\n")
+    if not hide_mnemonic:
+        click.echo(mnemonic + "\n")
 
     bip_obj_mst = Bip44.FromSeed(seed_bytes, Bip44Coins.BITCOIN)
     bip_obj_acc = bip_obj_mst.Purpose().Coin().Account(0)
@@ -23,5 +30,5 @@ def cli(mnemonic: str, passphrase: str, limit: int, print_private: bool):
         bip_obj_addr = bip_obj_chain.AddressIndex(i)
         address = bip_obj_addr.PublicKey().ToAddress()
         private = bip_obj_addr.PrivateKey().ToWif()
-        acc = f"{address} / {private}" if print_private else address
+        acc = address if hide_private else f"{address} / {private}"
         click.echo(acc)

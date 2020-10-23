@@ -1,20 +1,44 @@
 import click
-from bip_utils import Bip39MnemonicGenerator, Bip39SeedGenerator, Bip39WordsNum, Bip44, Bip44Changes, Bip44Coins
+from bip_utils import (
+    Bip39MnemonicGenerator,
+    Bip39MnemonicValidator,
+    Bip39SeedGenerator,
+    Bip39WordsNum,
+    Bip44,
+    Bip44Changes,
+    Bip44Coins,
+)
+
+from app.utils import fatal
 
 
 @click.command()
 @click.option("-m", "--mnemonic")
 @click.option("-p", "--passphrase", default="")
-@click.option("-l", "--limit", default=5)
-@click.option("--ask-passphrase", is_flag=True)
+@click.option("--prompt-mnemonic", is_flag=True)
+@click.option("--prompt-passphrase", is_flag=True)
 @click.option("--hide-mnemonic", is_flag=True)
 @click.option("--hide-private", is_flag=True)
-def cli(mnemonic: str, passphrase: str, limit: int, ask_passphrase: bool, hide_mnemonic: bool, hide_private: bool):
-    if ask_passphrase:
+@click.option("-l", "--limit", default=5)
+def cli(
+    mnemonic: str,
+    passphrase: str,
+    limit: int,
+    prompt_mnemonic: bool,
+    prompt_passphrase: bool,
+    hide_mnemonic: bool,
+    hide_private: bool,
+):
+    if prompt_passphrase:
         passphrase = click.prompt("passphrase", hide_input=True)
+    if prompt_mnemonic:
+        mnemonic = click.prompt("mnemonic", hide_input=True)
 
     if not mnemonic:
         mnemonic = Bip39MnemonicGenerator.FromWordsNumber(Bip39WordsNum.WORDS_NUM_24)
+
+    if not Bip39MnemonicValidator(mnemonic).Validate():
+        return fatal("Invalid mnemonic")
 
     seed_bytes = Bip39SeedGenerator(mnemonic).Generate(passphrase)
 

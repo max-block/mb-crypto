@@ -34,7 +34,8 @@ setuptools.setup(
     extras_require={"dev": load_requirements("requirements-dev.txt")},
     entry_points={
         "console_scripts": [
-            "bitcoin-keys = app.cmd.bitcoin_keys:cli",
+            "btc-balance = app.cmd.btc_balance:cli",
+            "btc-key = app.cmd.btc_key:cli",
         ],
     },
     include_package_data=True,

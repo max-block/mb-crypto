@@ -1,0 +1,5 @@
+--> blockcypher.com
+Classic requests, up to 3 requests/sec and 200 requests/hr
+WebHooks and WebSockets, up to 200 requests sent to your servers/hr
+WebHooks, up to 200 stored on our servers
+Confidence lookups, up to 15 requests/hour
